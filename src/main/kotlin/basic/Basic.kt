@@ -1,20 +1,20 @@
-package com.rirfee
+package com.rirfee.basic
 
+import com.rirfee.Config
 import work.socialhub.kbsky.BlueskyFactory
 import work.socialhub.kbsky.api.entity.app.bsky.feed.*
 import work.socialhub.kbsky.api.entity.com.atproto.server.ServerCreateSessionRequest
+import work.socialhub.kbsky.api.entity.com.atproto.server.ServerCreateSessionResponse
 import work.socialhub.kbsky.domain.Service.BSKY_SOCIAL
-import work.socialhub.kbsky.model.app.bsky.actor.ActorDefsProfileView
 import work.socialhub.kbsky.model.app.bsky.feed.FeedDefsFeedViewPost
 import work.socialhub.kbsky.model.app.bsky.feed.FeedDefsPostView
-import work.socialhub.kbsky.model.app.bsky.feed.FeedGetLikesLike
 
 /**
  * ログイン
  * @return accessJwt
  */
-fun login(): String {
-    val bsky = BlueskyFactory
+fun login(): ServerCreateSessionResponse {
+    val res = BlueskyFactory
         .instance(BSKY_SOCIAL.uri)
         .server()
         .createSession(
@@ -23,7 +23,7 @@ fun login(): String {
                 it.password = Config.BSKY_PASSWORD
             }
         )
-    return bsky.data.accessJwt
+    return res.data
 }
 
 /**
@@ -83,45 +83,6 @@ fun getPosts(accessJwt: String, uris: List<String>): List<FeedDefsPostView> {
 }
 
 /**
- * リポスト一覧の取得
- *
- * @param accessJwt
- * @param uri
- * @return
- */
-fun getRepostedBy(accessJwt: String, uri: String): List<ActorDefsProfileView> {
-    val res = BlueskyFactory
-        .instance(BSKY_SOCIAL.uri)
-        .feed()
-        .getRepostedBy(
-            FeedGetRepostedByRequest(accessJwt).also {
-                it.uri = uri
-            }
-        )
-
-    return res.data.repostedBy
-}
-
-/**
- * お気に入りの取得
- *
- * @param accessJwt
- * @param uri
- * @return
- */
-fun getLikes(accessJwt: String, uri: String): List<FeedGetLikesLike> {
-    val res = BlueskyFactory
-        .instance(BSKY_SOCIAL.uri)
-        .feed()
-        .getLikes(
-            FeedGetLikesRequest(accessJwt).also {
-                it.uri = uri
-            }
-        )
-    return res.data.likes
-}
-
-/**
  * postの表示用関数
  * @param post Postのデータ (FeedDefsPostView)
  */
@@ -136,9 +97,33 @@ ${post.record?.asFeedPost?.text}
 EMBEDS:
 ${embeds?.joinToString(separator = "\n") { it.toString() } ?: "" }
 URI:${post.uri}
+CID:${post.cid}
 """
     println(text)
 }
 
+fun basicSample() {
+    val res = login()
+    val accessJwt = res.accessJwt
 
+    val sampleUri = "at://did:plc:vgr7plhqeczx7jgulo4psukh/app.bsky.feed.post/3kyminlmrcz2z"
 
+    // タイムラインの取得
+    val timeline = getTimeline(accessJwt, 10)
+    timeline.forEach {
+        printPost(it.post)
+    }
+
+    // 投稿
+    post(accessJwt, "サンプル投稿")
+
+    // 指定した投稿を取得
+    val posts = getPosts(accessJwt, listOf(sampleUri))
+    posts.forEach {
+        printPost(it)
+    }
+}
+
+fun main() {
+    basicSample()
+}

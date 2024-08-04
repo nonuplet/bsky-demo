@@ -1,12 +1,13 @@
 package com.rirfee
 
 import work.socialhub.kbsky.BlueskyFactory
-import work.socialhub.kbsky.api.entity.app.bsky.feed.FeedGetTimelineRequest
-import work.socialhub.kbsky.api.entity.app.bsky.feed.FeedPostRequest
+import work.socialhub.kbsky.api.entity.app.bsky.feed.*
 import work.socialhub.kbsky.api.entity.com.atproto.server.ServerCreateSessionRequest
 import work.socialhub.kbsky.domain.Service.BSKY_SOCIAL
+import work.socialhub.kbsky.model.app.bsky.actor.ActorDefsProfileView
 import work.socialhub.kbsky.model.app.bsky.feed.FeedDefsFeedViewPost
 import work.socialhub.kbsky.model.app.bsky.feed.FeedDefsPostView
+import work.socialhub.kbsky.model.app.bsky.feed.FeedGetLikesLike
 
 /**
  * ログイン
@@ -58,6 +59,66 @@ fun getTimeline(accessJwt: String, limit: Int = 10): List<FeedDefsFeedViewPost> 
         )
 
     return res.data.feed
+}
+
+/**
+ * アドレスからポストの取得
+ *
+ * @param accessJwt
+ * @param uris アドレス(at://)
+ * @return
+ */
+fun getPosts(accessJwt: String, uris: List<String>): List<FeedDefsPostView> {
+    val res = BlueskyFactory
+        .instance(BSKY_SOCIAL.uri)
+        .feed()
+        .getPosts(
+            FeedGetPostsRequest(accessJwt).also {
+                it.uris = uris
+            }
+        )
+    println(res.json)
+
+    return res.data.posts
+}
+
+/**
+ * リポスト一覧の取得
+ *
+ * @param accessJwt
+ * @param uri
+ * @return
+ */
+fun getRepostedBy(accessJwt: String, uri: String): List<ActorDefsProfileView> {
+    val res = BlueskyFactory
+        .instance(BSKY_SOCIAL.uri)
+        .feed()
+        .getRepostedBy(
+            FeedGetRepostedByRequest(accessJwt).also {
+                it.uri = uri
+            }
+        )
+
+    return res.data.repostedBy
+}
+
+/**
+ * お気に入りの取得
+ *
+ * @param accessJwt
+ * @param uri
+ * @return
+ */
+fun getLikes(accessJwt: String, uri: String): List<FeedGetLikesLike> {
+    val res = BlueskyFactory
+        .instance(BSKY_SOCIAL.uri)
+        .feed()
+        .getLikes(
+            FeedGetLikesRequest(accessJwt).also {
+                it.uri = uri
+            }
+        )
+    return res.data.likes
 }
 
 /**

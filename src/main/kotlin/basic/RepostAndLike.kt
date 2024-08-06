@@ -63,9 +63,9 @@ fun repost(accessJwt: String, uri: String, cid: String): FeedRepostResponse {
 
 /**
  * リポストを削除
- *
+ *　TODO: これだけだと削除が成功したか判別できない、無効なアドレスを送ってもそのまま通ってしまう(リポストは実行されない)
  * @param accessJwt
- * @param repostUri
+ * @param repostUri (app.bsky.feed.repostのアドレスが必要)
  */
 fun deleteRepost(accessJwt: String, repostUri: String) {
     BlueskyFactory
@@ -121,12 +121,12 @@ fun like(accessJwt: String, uri: String, cid: String): FeedLikeResponse {
 
 /**
  * お気に入りの削除
- *
+ * TODO: deleteRepost()と同様に、削除が成功したか判別できない
  * @param accessJwt
  * @param likeUri (app.bsky.feed.likeのアドレスが必要)
  */
 fun deleteLike(accessJwt: String, likeUri: String) {
-    val res = BlueskyFactory
+    BlueskyFactory
         .instance(BSKY_SOCIAL.uri)
         .feed()
         .deleteLike(
@@ -173,15 +173,25 @@ fun sampleRepostAndLike() {
     println("***** isReposted *****")
     println("reposted? : ${isReposted(accessJwt, sampleUri, handle)}")
 
-    // お気に入り
+    // リポスト削除
+    deleteRepost(accessJwt, repostRes.uri)
+
+    // お気に入りの取得
     println("***** getLikes *****")
     getLikes(accessJwt, sampleUri).forEach {
         println("${it.actor.handle} ... ${it.indexedAt}")
     }
 
+    // お気に入りする
+    val resLike = like(accessJwt, sampleUri, sampleCid)
+    println("liked uri: ${resLike.uri}")
+
     // 自分がお気に入りしたか判定
     println("***** isLiked *****")
     println("liked? : ${isLiked(accessJwt, sampleUri, handle)}")
+
+    // お気に入り削除
+    deleteLike(accessJwt, resLike.uri)
 }
 
 fun main() {

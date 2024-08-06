@@ -1,19 +1,18 @@
 package com.rirfee
 
-import work.socialhub.kbsky.BlueskyFactory
-import work.socialhub.kbsky.api.entity.com.atproto.server.ServerCreateSessionRequest
-import work.socialhub.kbsky.domain.Service.BSKY_SOCIAL
+import com.rirfee.basic.*
 
 fun main() {
-    val bsky = BlueskyFactory
-        .instance(BSKY_SOCIAL.uri)
-        .server()
-        .createSession(
-            ServerCreateSessionRequest().also {
-                it.identifier = Config.BSKY_IDENTIFIER
-                it.password = Config.BSKY_PASSWORD
-            }
-        )
+    val res = login()
+    val accessJwt = res.accessJwt
+    val handle = res.handle
 
-    val accessJwt = bsky.data.accessJwt
+    val sampleUri = "at://did:plc:vgr7plhqeczx7jgulo4psukh/app.bsky.feed.post/3kyminlmrcz2z"
+    val sampleCid = "bafyreihdder7nuplhsypjhdtbv62vd2dmiy46amv7panqqbxfbkgie5zpq"
+
+    val a = getTimeline(accessJwt)
+    a.forEach {
+        printPost(it.post)
+        printRepost(it.reason)
+    }
 }

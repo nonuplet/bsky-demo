@@ -9,4 +9,10 @@ fun main() {
 
     val sampleUri = "at://did:plc:vgr7plhqeczx7jgulo4psukh/app.bsky.feed.post/3kyminlmrcz2z"
     val sampleCid = "bafyreihdder7nuplhsypjhdtbv62vd2dmiy46amv7panqqbxfbkgie5zpq"
+
+    val a = getTimeline(accessJwt)
+    a.forEach {
+        printPost(it.post)
+        printRepost(it.reason)
+    }
 }

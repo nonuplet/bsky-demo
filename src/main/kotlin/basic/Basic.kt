@@ -94,23 +94,39 @@ fun printPost(post: FeedDefsPostView) {
         """***** --------------- *****
 [${post.author?.displayName} (${post.author?.handle})]
 ${post.record?.asFeedPost?.text}
-💬${post.replyCount}  🔁${post.repostCount}  💕${post.likeCount}
-EMBEDS:
-${embeds?.joinToString(separator = "\n") { it.toString() } ?: ""}
+💬${post.replyCount}  🔁${post.repostCount}  💕${post.likeCount} 
 URI:${post.uri}
 CID:${post.cid}
 """
     println(text)
+    printEmbedImages(post)
+    printEmbedExternal(post)
 }
 
 /**
- * リポストかどうか
+ * リポスト表示
  *
  * @param reason
  */
 fun printRepost(reason: FeedDefsReasonRepost?) {
     if (reason == null) return
     println("reposted by ${reason.by?.displayName} (${reason.by?.handle})")
+}
+
+fun printEmbedImages(post: FeedDefsPostView) {
+    if (post.embed?.asImages == null) return
+    val images = post.embed?.asImages?.images
+    println("IMAGES:")
+    images?.forEach {
+        println(it.thumb)
+    }
+}
+
+fun printEmbedExternal(post: FeedDefsPostView) {
+    if (post.embed?.asExternal == null) return
+    val external = post.embed?.asExternal?.external
+    println("EXTERNAL:")
+    println("title: ${external?.title}\nthumb: ${external?.thumb}\nlink: ${external?.uri}")
 }
 
 fun basicSample() {
